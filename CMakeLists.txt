@@ -6,21 +6,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 
-# Find SFML
 find_package(SFML 2.5 COMPONENTS system window graphics audio REQUIRED)
 
-# Find PostgreSQL с явным указанием путей
 set(PostgreSQL_ADDITIONAL_VERSIONS 15 14 13 12)
 find_package(PostgreSQL REQUIRED)
 
-# Если не находит, попробуем вручную
 if(NOT PostgreSQL_FOUND)
     message(WARNING "PostgreSQL not found via find_package, trying manual...")
     set(PostgreSQL_INCLUDE_DIRS "/usr/include/postgresql")
     set(PostgreSQL_LIBRARIES "pq")
 endif()
 
-# Сообщаем о найденных библиотеках
 message(STATUS "PostgreSQL found: ${PostgreSQL_LIBRARIES}")
 message(STATUS "PostgreSQL include: ${PostgreSQL_INCLUDE_DIRS}")
 
