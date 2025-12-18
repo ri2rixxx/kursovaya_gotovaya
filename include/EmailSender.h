@@ -5,8 +5,8 @@
 
 class EmailSender {
 public:
-    EmailSender();  // Объявлен, но не = default
-    ~EmailSender(); // Объявлен, но не = default
+    EmailSender();
+    ~EmailSender();
     
     bool sendFeedback(const std::string& userName, 
                      const std::string& userEmail, 
