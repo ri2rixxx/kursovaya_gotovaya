@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: memory_game_postgres
+    environment:
+      POSTGRES_DB: memory_game_db
+      POSTGRES_USER: game_user
+      POSTGRES_PASSWORD: game_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - game_network
+
+  memory-game:
+    build: .
+    container_name: memory_game
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: "postgresql://game_user:game_password@postgres:5432/memory_game_db"
+      DISPLAY: ${DISPLAY}
+      # Sound settings
+      PULSE_SERVER: unix:${XDG_RUNTIME_DIR}/pulse/native
+    volumes:
+      # Mount data folders - используем относительные пути
+      - ./saves:/app/saves:rw
+      - ./feedback:/app/feedback:rw
+      - ./database:/app/database:rw
+      # X11 for graphics
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      # PulseAudio socket
+      - ${XDG_RUNTIME_DIR}/pulse/native:${XDG_RUNTIME_DIR}/pulse/native:rw
+      # PulseAudio config
+      - ~/.config/pulse:/home/gameuser/.config/pulse:ro
+    networks:
+      - game_network
+    stdin_open: true
+    tty: true
+
+networks:
+  game_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
