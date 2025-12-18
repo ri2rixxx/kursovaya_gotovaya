@@ -16,7 +16,6 @@ void Player::incrementMatchedPairs() {
 void Player::calculateScore(int totalPairs) {
     double timeInSeconds = getElapsedTime();
     
-    // Формула подсчета очков:
     // Базовые очки за пары * коэффициент эффективности - штраф за время
     int baseScore = matchedPairs * 100;
     double efficiency = (double)matchedPairs / (moves > 0 ? moves : 1);
