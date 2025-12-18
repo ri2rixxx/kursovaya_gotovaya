@@ -92,7 +92,6 @@ Game::Game()
                             [this]() { surrenderGame(); });
     surrenderButton.setColors(sf::Color(220, 20, 60), sf::Color(255, 0, 0), sf::Color(178, 34, 34));
     
-        //ИНИЦИАЛИЗАЦИЯ POSTGRESQL БАЗЫ ДАННЫХ
     std::cout << "Initializing PostgreSQL database..." << std::endl;
     
     // Определяем строку подключения
@@ -139,7 +138,7 @@ Game::Game()
     }
     
     // Инициализация UserManager
-    userManager = std::make_unique<UserManager>(connStr);  // ИСПРАВЬТЕ ЗДЕСЬ
+    userManager = std::make_unique<UserManager>(connStr);
     if (userManager->initialize()) {
         std::cout << "✅ UserManager initialized with PostgreSQL" << std::endl;
     } else {
@@ -221,7 +220,7 @@ void Game::setupLoginUI() {
                 // Создаем объект игрока
                 player = std::make_unique<Player>(usernameInput);
                 
-                // Создаем менеджер достижений ДЛЯ ЭТОГО ПОЛЬЗОВАТЕЛЯ
+                // Создаем менеджер достижений
                 achievementManager = std::make_unique<AchievementManager>(usernameInput);
                 
                 // Загружаем достижения пользователя
@@ -1447,7 +1446,6 @@ void Game::checkAchievements() {
     std::cout << "Total pairs: " << totalPairs << std::endl;
     std::cout << "Time: " << elapsedTime.asSeconds() << " seconds" << std::endl;
     
-    // Обновляем таймер ежедневной игры
     achievementManager->recordDailyPlay();
     
     // Получаем названия темы и сложности
@@ -1462,7 +1460,7 @@ void Game::checkAchievements() {
     
     std::string difficultyName = getDifficultyString();
     
-    // Обновляем статистику тем и сложностей ПЕРЕД проверкой достижений
+    // Обновляем статистику тем и сложностей перед проверкой достижений
     achievementManager->addPlayedTheme(themeName);
     achievementManager->addPlayedDifficulty(difficultyName);
     
@@ -1849,7 +1847,7 @@ void Game::initializeCards() {
     std::cout << "Поле: " << rows << "x" << cols << " = " << totalCards << " карт" << std::endl;
     std::cout << "Нужно пар: " << totalPairs << std::endl;
     
-    // 1. Получаем файлы из папки текущей темы
+    // Получаем файлы из папки текущей темы
     std::string themeFolder;
     switch (currentTheme) {
         case CardTheme::ANIMALS: themeFolder = "animals"; break;
@@ -1863,7 +1861,7 @@ void Game::initializeCards() {
     std::string imageDir = "assets/images/" + themeFolder + "/";
     std::cout << "Ищем изображения в: " << imageDir << std::endl;
     
-    // 2. Собираем список доступных файлов
+    // Собираем список доступных файлов
     std::vector<std::string> availableImages;
     try {
         for (const auto& entry : fs::directory_iterator(imageDir)) {
@@ -1881,7 +1879,7 @@ void Game::initializeCards() {
         std::cout << "Ошибка доступа к папке: " << e.what() << std::endl;
     }
     
-    // 3. Если нет файлов, создаем тестовые имена
+    // Если нет файлов, создаем тестовые имена
     if (availableImages.empty()) {
         std::cout << "Файлы не найдены, создаем тестовые..." << std::endl;
         for (int i = 1; i <= totalPairs; i++) {
@@ -1889,7 +1887,7 @@ void Game::initializeCards() {
         }
     }
     
-    // 4. ГАРАНТИРУЕМ ПАРНОСТЬ
+    // Гарантируем парность
     std::vector<std::string> pairedImages;
     
     // Берем первые totalPairs уникальных изображений
@@ -1905,7 +1903,7 @@ void Game::initializeCards() {
     
     std::cout << "Используем " << pairedImages.size() << " изображений для пар" << std::endl;
     
-    // 5. СОЗДАЕМ КАРТЫ ПАРАМИ
+    // создаем карты парами
     int cardId = 0;
     for (int i = 0; i < totalPairs; i++) {
         std::string imagePath = pairedImages[i];
@@ -1920,12 +1918,12 @@ void Game::initializeCards() {
                   << " (ID: " << (cardId-2) << " и " << (cardId-1) << ")" << std::endl;
     }
     
-    // 6. Перемешиваем
+    // Перемешиваем
     std::random_device rd;
     std::mt19937 g(rd());
     std::shuffle(gameCards.begin(), gameCards.end(), g);
     
-    // 7. ПРОВЕРКА
+    // проверка
     std::cout << "\n📊 ПРОВЕРКА:" << std::endl;
     std::cout << "Всего карт: " << gameCards.size() << std::endl;
     std::cout << "Должно быть: " << totalCards << std::endl;
@@ -2043,7 +2041,6 @@ void Game::resetGame() {
         std::cout << "✅ Инициализация успешна!" << std::endl;
     } else {
         std::cout << "❌ ОШИБКА: Не все спрайты созданы!" << std::endl;
-        // Исправляем: создаем недостающие карты
         int neededCards = rows * cols;
         int currentCards = cards.size();
         if (currentCards < neededCards) {
@@ -2067,11 +2064,10 @@ void Game::resetGame() {
                 float x = startX + col * (cardSize + spacing);
                 float y = startY + row * (cardSize + spacing);
                 
-                // Используем первое изображение как fallback
                 std::string imagePath = !imagePaths.empty() ? imagePaths[0] : "fallback.png";
                 
                 auto cardSprite = std::make_unique<CardSprite>(
-                    i + 1000, // ID с смещением, чтобы не конфликтовать
+                    i + 1000,
                     imagePath, 
                     x, y, 
                     cardSize
@@ -2103,7 +2099,7 @@ void Game::resetGame() {
 
 void Game::updateStats() {
     std::stringstream statsSS;
-    statsSS << "Player: " << (player ? player->getName() : "Guest") << "\n\n"  // Два переноса
+    statsSS << "Player: " << (player ? player->getName() : "Guest") << "\n\n"
             << "Difficulty: " << getDifficultyString() << "\n\n"
             << "Field: " << rows << "x" << cols << " (" << (rows * cols) << " cards)\n\n"
             << "Moves: " << moves << "\n\n"
@@ -2112,7 +2108,7 @@ void Game::updateStats() {
             << (totalPairs > 0 ? (matchedPairs * 100.0 / totalPairs) : 0) << "%";
     
     statsText.setString(statsSS.str());
-    statsText.setLineSpacing(1.2f); // Добавляем межстрочный интервал
+    statsText.setLineSpacing(1.2f);
     
     if (player) {
         player->calculateScore(totalPairs);
@@ -2138,7 +2134,6 @@ void Game::handleLoginInput(sf::Event event) {
                 activeInputField = InputField::USERNAME;
             }
         } else if (event.text.unicode == '\r') { // Enter
-            // Автоматический вход при нажатии Enter
             if (!usernameInput.empty() && !passwordInput.empty()) {
                 std::string errorMsg;
                 if (userManager->login(usernameInput, passwordInput, errorMsg)) {
@@ -2569,7 +2564,6 @@ void Game::render() {
             break;
             
         default:
-            // Резервный рендеринг
             sf::Text defaultText("Game State: " + std::to_string(static_cast<int>(currentState)), mainFont, 32);
             defaultText.setFillColor(sf::Color::White);
             defaultText.setPosition(100, 100);
@@ -2798,7 +2792,6 @@ void Game::processCardMatch() {
             player->calculateScore(totalPairs);
         }
         
-        // ПРОВЕРКА ПОБЕДЫ 
         if (matchedPairs >= totalPairs && !hasWon) {
             std::cout << "🎉🎉🎉 ПОБЕДА! ВСЕ ПАРЫ НАЙДЕНЫ! 🎉🎉🎉" << std::endl;
             std::cout << "Условие: " << matchedPairs << " >= " << totalPairs << std::endl;
@@ -2849,7 +2842,7 @@ void Game::processCardMatch() {
         // Небольшая задержка
         sf::Clock delayClock;
         while (delayClock.getElapsedTime().asSeconds() < 0.8f) {
-            // Ждем
+            
         }
         
         firstCard->hide();
@@ -2887,8 +2880,8 @@ void Game::logoutUser() {
         }
         
         userManager->logout();
-        achievementManager.reset(); // Сбрасываем менеджер достижений
-        player.reset(); // Сбрасываем игрока
+        achievementManager.reset();
+        player.reset();
         
         // Возвращаемся на экран входа
         currentState = GameState::LOGIN_SCREEN;
