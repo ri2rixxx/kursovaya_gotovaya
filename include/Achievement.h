@@ -139,7 +139,6 @@ public:
     void recordPerfectMatch();
     void recordQuickMatch(double time);
     
-    // Новые методы для статистики
     void addPlayedTheme(const std::string& theme);
     void addPlayedDifficulty(const std::string& difficulty);
     int getPlayedThemesCount() const { return playedThemes.size(); }
